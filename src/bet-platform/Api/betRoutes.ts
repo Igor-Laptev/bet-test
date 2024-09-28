@@ -2,8 +2,9 @@ import { FastifyInstance } from 'fastify';
 import { prisma } from '../../prismaClient';
 import { betCreationSchema } from '../../Util/validationSchemas';
 
+// Описание: Маршруты для управления ставками
 export default async function betRoutes(server: FastifyInstance) {
-  
+  // Получение событий для ставок
   server.get('/events', async (request, reply) => {
     try {
       const events = await prisma.event.findMany({
@@ -43,11 +44,9 @@ export default async function betRoutes(server: FastifyInstance) {
         });
 
         if (!event || event.deadline < Math.floor(Date.now() / 1000)) {
-          return reply
-            .code(400)
-            .send({
-              error: 'Событие не найдено или истек дедлайн для ставок.',
-            });
+          return reply.code(400).send({
+            error: 'Событие не найдено или истек дедлайн для ставок.',
+          });
         }
 
         const newBet = await prisma.bet.create({

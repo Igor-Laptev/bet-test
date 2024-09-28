@@ -1,5 +1,6 @@
 import { FastifyError, FastifyRequest, FastifyReply } from 'fastify';
 
+// Описание: Глобальный обработчик ошибок для сервера Fastify
 export default function errorHandler(
   error: FastifyError,
   request: FastifyRequest,

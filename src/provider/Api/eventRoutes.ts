@@ -7,6 +7,7 @@ import {
   updateStatusSchema,
 } from '../../Util/validationSchemas';
 
+// Описание: Маршруты для управления событиями
 export default async function eventRoutes(server: FastifyInstance) {
   // Получение всех событий
   server.get('/events', async (request, reply) => {

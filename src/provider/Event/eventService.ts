@@ -1,41 +1,32 @@
-import { v4 as uuidv4 } from 'uuid';
+import { prisma } from '../../prismaClient';
+import axios from 'axios';
 
-interface Event {
-  id: string;
-  coefficient: number;
-  deadline: number;
-  status: 'pending' | 'first_team_won' | 'second_team_won';
-}
+// Описание: Сервис для обновления статусов событий и отправки вебхуков
+export async function updateEventStatus(numericId: number, status: string) {
+  try {
+    // Обновляем статус события в базе данных
+    const updatedEvent = await prisma.event.update({
+      where: { id: numericId },
+      data: { status },
+    });
 
-// Массив для хранения событий в памяти
-const events: Event[] = [];
+    try {
+      // Отправляем вебхук в bet-platform
+      await axios.post('http://localhost:3001/webhook/event-status', {
+        eventId: numericId,
+        status,
+      });
+      console.log('Вебхук успешно отправлен в bet-platform');
+    } catch (webhookError) {
+      console.error(
+        'Ошибка при отправке вебхука в bet-platform:',
+        webhookError
+      );
+    }
 
-// Получение всех событий
-export function getAllEvents(): Event[] {
-  return events;
-}
-
-// Создание нового события
-export function createEvent(coefficient: number, deadline: number): Event {
-  const newEvent: Event = {
-    id: uuidv4(),
-    coefficient,
-    deadline,
-    status: 'pending',
-  };
-  events.push(newEvent);
-  return newEvent;
-}
-
-// Обновление статуса события
-export function updateEventStatus(
-  id: string,
-  status: 'first_team_won' | 'second_team_won'
-): Event | null {
-  const event = events.find((e) => e.id === id);
-  if (event) {
-    event.status = status;
-    return event;
+    return updatedEvent;
+  } catch (error) {
+    console.error('Ошибка при обновлении события и отправке вебхука:', error);
+    throw new Error('Ошибка обновления события.');
   }
-  return null;
 }

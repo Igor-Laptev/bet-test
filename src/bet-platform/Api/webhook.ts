@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { prisma } from '../../prismaClient';
 import { validateNumberId } from '../../Util/common';
 
+// Описание: Маршрут для обработки вебхуков от provider сервиса
 export default async function webhookRoutes(server: FastifyInstance) {
   // Обработка статуса события
   server.post('/webhook/event-status', async (request, reply) => {

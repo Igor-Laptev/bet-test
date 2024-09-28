@@ -1,3 +1,6 @@
+// Описание: Валидационные схемы для обработки данных в API
+
+// Схема для создания события
 export const eventCreationSchema = {
   body: {
     type: 'object',
@@ -13,6 +16,7 @@ export const eventCreationSchema = {
   },
 };
 
+// Схема для обновления статуса события
 export const updateStatusSchema = {
   params: {
     type: 'object',
@@ -34,6 +38,7 @@ export const updateStatusSchema = {
   },
 };
 
+// Схема для создания ставки
 export const betCreationSchema = {
   body: {
     type: 'object',

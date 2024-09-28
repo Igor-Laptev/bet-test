@@ -1,7 +1,9 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import request from 'supertest';
-import betRoutes from './betRoutes'; // Ваши маршруты ставок
+import betRoutes from './betRoutes'; // Маршруты ставок
 
+// Описание: Тестирование Bet API
+// Используются инструменты Fastify и Supertest для эмуляции запросов и проверок ответов
 describe('Тестирование Bet API', () => {
   let server: FastifyInstance;
 
@@ -17,7 +19,7 @@ describe('Тестирование Bet API', () => {
     await server.close(); // Закрываем сервер, чтобы избежать утечек
   });
 
-  // Тест на получение пустого списка ставок
+  // Тест проверяет, что при отсутствии ставок возвращается пустой массив
   it('GET /bets должен возвращать пустой массив, если ставок нет', async () => {
     const response = await request(server.server).get('/bets');
 
@@ -25,8 +27,7 @@ describe('Тестирование Bet API', () => {
     expect(response.body).toEqual([]); // Ожидаем пустой массив
   }, 15000); // Увеличен тайм-аут до 15 секунд
 
-    
-  // Тест на ошибку при создании ставки с неверным ID события
+  // Тест проверяет, что при неверном ID события возвращается ошибка
   it('POST /bets должен вернуть ошибку для неверного ID события', async () => {
     const invalidBet = {
       eventId: 9999, // Несуществующий ID события
@@ -43,8 +44,7 @@ describe('Тестирование Bet API', () => {
     );
   }, 15000);
 
-  
-  // Тест на получение списка всех ставок
+  // Тест проверяет, что возвращается список всех ставок
   it('GET /bets должен вернуть все ставки', async () => {
     const response = await request(server.server).get('/bets');
 
