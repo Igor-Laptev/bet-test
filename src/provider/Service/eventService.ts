@@ -1,7 +1,7 @@
 import { prisma } from '../../prismaClient';
 import axios from 'axios';
 
-export async function updateEventStatusAndNotify(
+export async function updateEventStatus(
   numericId: number,
   status: string
 ) {

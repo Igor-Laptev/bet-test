@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../../prismaClient';
-import { updateEventStatusAndNotify } from '../Service/eventService';
+import { updateEventStatus } from '../Service/eventService';
 import { validateNumberId } from '../../Util/common';
 import {
   eventCreationSchema,
@@ -55,7 +55,7 @@ export default async function eventRoutes(server: FastifyInstance) {
 
       try {
         const numericId = validateNumberId(id);
-        const updatedEvent = await updateEventStatusAndNotify(
+        const updatedEvent = await updateEventStatus(
           numericId,
           status
         );
