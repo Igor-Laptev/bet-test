@@ -1,0 +1,24 @@
+version: '3.4'
+
+services:
+  provider:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .:/usr/src
+      - /usr/src/node_modules
+    ports:
+      - '3000:3000'
+    command: sh -c "npx prisma generate && npm run dev:provider"
+
+  bet-platform:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .:/usr/src
+      - /usr/src/node_modules
+    ports:
+      - '3001:3001'
+    command: sh -c "npx prisma generate && npm run dev:bet-platform"
