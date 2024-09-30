@@ -172,3 +172,4 @@ GET /bets
 5. **Запуск серверов**: Указаны команды для запуска двух сервисов — **provider** и **bet-platform**.
 6. **API документация**: Описана структура API с примерами запросов и ответов.
 ```
+docker exec -it bet-test-provider-1 sh -c "node dist/prisma/seed.js"

@@ -1,4 +1,4 @@
-import { prisma } from '../../prismaClient';
+import { prisma } from '../../prismaClient.js';
 import axios from 'axios';
 
 export async function updateEventStatus(numericId: number, status: string) {

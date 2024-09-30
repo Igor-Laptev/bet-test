@@ -1,6 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import request from 'supertest';
-import betRoutes from './betRoutes'; // Маршруты ставок
+import betRoutes from './betRoutes';
 
 // Описание: Тестирование Bet API
 // Используются инструменты Fastify и Supertest для эмуляции запросов и проверок ответов
