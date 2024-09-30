@@ -13,7 +13,7 @@
 
 Сначала нужно склонировать репозиторий с GitHub. Для этого выполните команду в терминале:
 
-```bash
+````bash
 git clone https://github.com/<your-username>/bet-test.git
 
 Или, если вы создаёте форк проекта:
@@ -32,7 +32,7 @@ npm install
 Создайте базу данных PostgreSQL с именем testDb.
 
 В файле .env укажите данные для подключения к базе данных:
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/testDb"
+Файл уже в проекте только переименовать необходимо!
 
 
 4. Применение миграций
@@ -40,23 +40,20 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/testDb"
 npx prisma migrate deploy
 
 
-5. Запуск сервера
-Запустите каждый сервис в отдельных терминалах.
+5. Запуск через Docker
+Запустите сервисы с помощью Docker Compose:
 
-Запуск сервиса provider:
-npm run dev --workspace=provider
+```bash
 
-Запуск сервиса bet-platform:
-npm run dev --workspace=bet-platform
+docker-compose up --build
 
+После сборки и запуска контейнеров, чтобы применить сиды для начальных данных, выполните команду:
+```bash
+docker exec -it bet-test-provider-1 sh -c "node dist/prisma/seed.js"
+6. Тут должно быть информация про тесты, но они не работают как надо так что только руками через Postman
 
-6. Тестирование
-Чтобы проверить работу приложения, вы можете запустить тесты с помощью:
-npm test
-
-
-Структура API
-Provider API
+                                  Структура API
+                                  Provider API
 1. Получение списка всех событий
 GET /events
 
@@ -101,7 +98,13 @@ PUT /events/:id
   "status": "first_team_won"
 }
 
-Bet-Platform API
+Пример ответа:
+{
+  "message": "Статус события обновлен"
+}
+
+
+                                Bet-Platform API
 1. Получение списка событий для ставок
 GET /events
 
@@ -158,6 +161,46 @@ GET /bets
   }
 ]
 
+4. Обработка вебхуков на изменение статуса события
+POST /webhook/event-status
+
+Тело запроса:
+{
+  "eventId": "event2",
+  "status": "cancelled"
+}
+
+Пример ответа:
+{
+  "message": "Статусы ставок обновлены",
+  "updatedBets": {
+    "count": 1
+}
+
+                                Проверка состояния Docker-контейнеров
+После запуска docker-compose up --build, выполните следующие команды, чтобы убедиться, что контейнеры запущены корректно:
+
+1. Проверка запущенных контейнеров:
+docker ps
+
+2. Просмотр логов контейнеров:
+  Для Provider сервиса:
+  docker logs bet-test-provider-1
+
+  Для Bet-Platform сервиса:
+  docker logs bet-test-bet-platform-1
+
+3. Проверка доступности API:
+  Для Provider сервиса:
+  curl http://localhost:3000/events
+
+
+  Для Bet-Platform сервиса:
+  curl http://localhost:3001/events
+
+
+
+
 Примечания
 Сервисы реализованы с использованием Fastify.
 Для работы с базой данных используется Prisma ORM.
@@ -171,5 +214,6 @@ GET /bets
 4. **Применение миграций**: Указаны команды для применения миграций через Prisma.
 5. **Запуск серверов**: Указаны команды для запуска двух сервисов — **provider** и **bet-platform**.
 6. **API документация**: Описана структура API с примерами запросов и ответов.
-```
-docker exec -it bet-test-provider-1 sh -c "node dist/prisma/seed.js"
+7. **Проверка состояния Docker-контейнеров**
+````
+
