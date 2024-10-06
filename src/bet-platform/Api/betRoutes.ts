@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../../prismaClient.js';
-
 import { betCreationSchema } from '../../Util/validationSchemas.js';
 
 // Описание: Маршруты для управления ставками
@@ -75,26 +74,6 @@ export default async function betRoutes(server: FastifyInstance) {
     } catch (error) {
       console.error(error);
       return reply.code(500).send({ error: 'Ошибка при получении ставок.' });
-    }
-  });
-
-  // Получение ставки по id
-  server.get('/bets/:id', async (request, reply) => {
-    const { id } = request.params as { id: string };
-
-    try {
-      const bet = await prisma.bet.findUnique({
-        where: { id: Number(id) },
-      });
-
-      if (!bet) {
-        return reply.code(404).send({ error: 'Ставка не найдена.' });
-      }
-
-      return reply.code(200).send(bet);
-    } catch (error) {
-      console.error(error);
-      return reply.code(500).send({ error: 'Ошибка при получении ставки.' });
     }
   });
 }

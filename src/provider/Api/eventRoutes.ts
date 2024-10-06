@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../../prismaClient.js';
-
 import { updateEventStatus } from '../Service/eventService.js';
 import { validateNumberId } from '../../Util/common.js';
 import {
@@ -10,6 +9,7 @@ import {
 
 // Описание: Маршруты для управления событиями
 export default async function eventRoutes(server: FastifyInstance) {
+  // Получение всех событий
   server.get('/events', async (request, reply) => {
     try {
       await prisma.$connect(); // Проверка подключения к БД

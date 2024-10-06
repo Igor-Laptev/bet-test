@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import betRoutes from '../Api/betRoutes.js';
 import webhookRoutes from '../Api/webhook.js';
+import errorHandler from '../../Util/errorHandler.js'; // Импортируем обработчик ошибок
 
 // Описание: Инициализация Fastify сервера и подключение маршрутов
 const server = Fastify();
@@ -15,6 +16,9 @@ server.register(betRoutes);
 
 // Подключаем маршруты для обработки вебхуков
 server.register(webhookRoutes);
+
+// Глобальный обработчик ошибок
+server.setErrorHandler(errorHandler); // Регистрируем глобальный обработчик ошибок
 
 // Запуск сервера на порту 3001
 server.listen({ port: 3001, host: '0.0.0.0' }, (err, address) => {

@@ -14,19 +14,27 @@ export default async function webhookRoutes(server: FastifyInstance) {
     try {
       const numericEventId = validateNumberId(eventId);
 
-      const updatedBets = await prisma.bet.updateMany({
-        where: { eventId: numericEventId },
-        data: { status },
+      // Использование транзакции для обновления статусов
+      await prisma.$transaction(async (prisma) => {
+        // Обновляем статус события
+        await prisma.event.update({
+          where: { id: numericEventId },
+          data: { status },
+        });
+
+        // Обновляем статусы связанных ставок
+        await prisma.bet.updateMany({
+          where: { eventId: numericEventId },
+          data: { status },
+        });
       });
 
       return reply
         .code(200)
-        .send({ message: 'Статусы ставок обновлены', updatedBets });
+        .send({ message: 'Статусы события и ставок обновлены' });
     } catch (error) {
       console.error(error);
-      return reply
-        .code(500)
-        .send({ error: 'Ошибка при обновлении статусов ставок.' });
+      return reply.code(500).send({ error: 'Ошибка при обновлении статусов.' });
     }
   });
 }
