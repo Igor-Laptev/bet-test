@@ -1,10 +1,39 @@
 import Fastify from 'fastify';
 import betRoutes from '../Api/betRoutes.js';
 import webhookRoutes from '../Api/webhook.js';
-import errorHandler from '../../Util/errorHandler.js'; // Импортируем обработчик ошибок
+import errorHandler from '../../Util/errorHandler.js';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 
 // Описание: Инициализация Fastify сервера и подключение маршрутов
 const server = Fastify();
+
+// Swagger documentation configuration
+server.register(swagger, {
+  swagger: {
+    info: {
+      title: 'Bet Platform API',
+      description: 'API for managing bets and events',
+      version: '1.0.0',
+    },
+    host: 'localhost:3001',
+    schemes: ['http'],
+    consumes: ['application/json'],
+    produces: ['application/json'],
+  },
+});
+
+// Swagger UI
+server.register(swaggerUi, {
+  routePrefix: '/documentation',
+  swagger: {
+    info: {
+      title: 'Bet Platform API Documentation',
+      description: 'API documentation',
+      version: '1.0.0',
+    },
+  },
+});
 
 // Добавляем маршрут для корневого URL
 server.get('/', async (request, reply) => {

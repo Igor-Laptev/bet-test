@@ -3,7 +3,6 @@ import { prisma } from '../../prismaClient.js';
 import { betCreationSchema } from '../../Util/validationSchemas.js';
 
 export default async function betRoutes(server: FastifyInstance) {
-  // Существующий код для GET и POST маршрутов
   server.get('/events', async (request, reply) => {
     try {
       const events = await prisma.event.findMany({
@@ -29,7 +28,37 @@ export default async function betRoutes(server: FastifyInstance) {
 
   server.post(
     '/bets',
-    { schema: betCreationSchema },
+    {
+      schema: {
+        description: 'Создает новую ставку',
+        tags: ['Bets'],
+        body: betCreationSchema,
+        response: {
+          201: {
+            type: 'object',
+            properties: {
+              id: { type: 'integer' },
+              eventId: { type: 'integer' },
+              amount: { type: 'number' },
+              potentialWin: { type: 'number' },
+              status: { type: 'string' },
+            },
+          },
+          400: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+            },
+          },
+          404: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
     async (request, reply) => {
       const { eventId, amount } = request.body as {
         eventId: number;
@@ -43,7 +72,9 @@ export default async function betRoutes(server: FastifyInstance) {
       }
 
       try {
-        const event = await prisma.event.findUnique({ where: { id: eventId } });
+        const event = await prisma.event.findUnique({
+          where: { id: eventId },
+        });
 
         const currentTime = Math.floor(Date.now() / 1000);
         console.log('Event:', event);
@@ -78,36 +109,12 @@ export default async function betRoutes(server: FastifyInstance) {
     }
   );
 
-  server.patch('/bets/:id', async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const { status } = request.body as { status: string };
-
-    try {
-      const bet = await prisma.bet.findUnique({ where: { id: Number(id) } });
-
-      if (!bet) {
-        return reply.code(404).send({ error: 'Ставка не найдена.' });
-      }
-
-      const updatedBet = await prisma.bet.update({
-        where: { id: Number(id) },
-        data: { status },
-      });
-
-      return reply.code(200).send(updatedBet);
-    } catch (error) {
-      console.error('Error updating bet:', error);
-      return reply.code(500).send({ error: 'Ошибка при обновлении ставки.' });
-    }
-  });
-
-  // Добавление DELETE маршрута для удаления ставки по ID
+  // Маршрут для удаления ставки по ID
   server.delete('/bets/:id', async (request, reply) => {
     const { id } = request.params as { id: string };
 
     try {
       const bet = await prisma.bet.findUnique({ where: { id: Number(id) } });
-
       if (!bet) {
         return reply.code(404).send({ error: 'Ставка не найдена.' });
       }
@@ -120,7 +127,6 @@ export default async function betRoutes(server: FastifyInstance) {
     }
   });
 
-  // Добавление PATCH маршрута для обновления коэффициента события
   server.patch('/events/:id', async (request, reply) => {
     const { id } = request.params as { id: string };
     const { coefficient } = request.body as { coefficient: number };

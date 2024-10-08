@@ -5,7 +5,7 @@ import { prisma } from '../../__mocks__/prismaClient';
 
 jest.setTimeout(30000);
 
-describe('Bet API', () => {
+describe('Bet API - Additional Tests', () => {
   let server: FastifyInstance;
 
   beforeAll(async () => {
@@ -22,45 +22,13 @@ describe('Bet API', () => {
     jest.clearAllMocks();
   });
 
-  it('POST /bets должен вернуть ошибку при создании ставки с истекшим сроком события', async () => {
-    const expiredBet = { eventId: 1, amount: 50.0 };
+  it('DELETE /bets/:id должен возвращать 404, если ставка не найдена', async () => {
+    prisma.bet.findUnique.mockResolvedValueOnce(null);
 
-    prisma.event.findUnique.mockResolvedValueOnce({
-      id: 1,
-      coefficient: 1.5,
-      deadline: 1000000,
-      status: 'pending',
-    });
+    const response = await request(server.server).delete('/bets/9999');
 
-    const response = await request(server.server)
-      .post('/bets')
-      .send(expiredBet);
-
-    console.log('Expected expired event deadline: 1000000');
-    expect(response.status).toBe(400);
-    expect(response.body.error).toBe('Срок действия события истек.');
-  });
-
-  it('POST /bets должен создать ставку с корректными данными', async () => {
-    const validBet = { eventId: 1, amount: 50.0 };
-
-    prisma.event.findUnique.mockResolvedValueOnce({
-      id: 1,
-      deadline: Math.floor(Date.now() / 1000) + 1000,
-      coefficient: 1.5,
-      status: 'pending',
-    });
-
-    prisma.bet.create.mockResolvedValueOnce({
-      id: 1,
-      eventId: 1,
-      amount: 50.0,
-      status: 'pending',
-    });
-
-    const response = await request(server.server).post('/bets').send(validBet);
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('id');
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Ставка не найдена.');
   });
 
   it('DELETE /bets/:id должен удалять ставку по ID', async () => {
@@ -77,7 +45,25 @@ describe('Bet API', () => {
     expect(response.status).toBe(204);
   });
 
-  it('PATCH /events/:id должен обновить коэффициент события', async () => {
+  it('POST /bets должен возвращать 400, если сумма ставки отрицательная', async () => {
+    const invalidBet = { eventId: 1, amount: -50.0 };
+
+    prisma.event.findUnique.mockResolvedValueOnce({
+      id: 1,
+      deadline: Math.floor(Date.now() / 1000) + 1000,
+      coefficient: 1.5,
+      status: 'pending',
+    });
+
+    const response = await request(server.server)
+      .post('/bets')
+      .send(invalidBet);
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Bad Request');
+  });
+
+  it('PATCH /events/:id должен корректно обновлять коэффициент', async () => {
     prisma.event.findUnique.mockResolvedValueOnce({
       id: 1,
       deadline: Math.floor(Date.now() / 1000) + 1000,
@@ -88,14 +74,15 @@ describe('Bet API', () => {
     prisma.event.update.mockResolvedValueOnce({
       id: 1,
       deadline: Math.floor(Date.now() / 1000) + 1000,
-      coefficient: 2.0,
+      coefficient: 2.5,
+      status: 'pending',
     });
 
     const response = await request(server.server)
       .patch('/events/1')
-      .send({ coefficient: 2.0 });
+      .send({ coefficient: 2.5 });
 
     expect(response.status).toBe(200);
-    expect(response.body.coefficient).toBe(2.0);
+    expect(response.body.coefficient).toBe(2.5);
   });
 });

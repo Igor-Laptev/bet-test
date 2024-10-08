@@ -1,11 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../../prismaClient.js';
-import { updateEventStatus } from '../Service/eventService.js';
-import { validateNumberId } from '../../Util/common.js';
-import {
-  eventCreationSchema,
-  updateStatusSchema,
-} from '../../Util/validationSchemas.js';
+import { eventCreationSchema } from '../../Util/validationSchemas.js';
 
 export default async function eventRoutes(server: FastifyInstance) {
   server.get('/events', async (request, reply) => {
@@ -19,7 +14,30 @@ export default async function eventRoutes(server: FastifyInstance) {
 
   server.post(
     '/events',
-    { schema: eventCreationSchema },
+    {
+      schema: {
+        description: 'Создает новое событие',
+        tags: ['Events'],
+        body: eventCreationSchema,
+        response: {
+          201: {
+            type: 'object',
+            properties: {
+              id: { type: 'integer' },
+              coefficient: { type: 'number' },
+              deadline: { type: 'integer' },
+              status: { type: 'string' },
+            },
+          },
+          400: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
     async (request, reply) => {
       const { coefficient, deadline } = request.body as {
         coefficient: number;

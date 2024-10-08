@@ -35,15 +35,15 @@ describe('Provider Event API', () => {
 
   it('POST /events должен вернуть ошибку при создании события с недопустимым коэффициентом', async () => {
     const invalidCoefficientEvent = {
-      coefficient: 0.5,
-      deadline: Date.now() / 1000 + 10000,
+      coefficient: 0.5, // Это значение меньше 1
+      deadline: Math.floor(Date.now() / 1000) + 10000,
     };
 
     const response = await request(server.server)
       .post('/events')
       .send(invalidCoefficientEvent);
     expect(response.status).toBe(400);
-    expect(response.body.message).toBe('body/coefficient must be >= 1');
+    expect(response.body.error).toBe('Bad Request');
   });
 
   it('DELETE /events/:id должен удалять событие по ID', async () => {
