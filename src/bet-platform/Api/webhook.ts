@@ -2,27 +2,34 @@ import { FastifyInstance } from 'fastify';
 import { prisma } from '../../prismaClient.js';
 import { validateNumberId } from '../../Util/common.js';
 
-// Описание: Маршрут для обработки вебхуков от provider сервиса
 export default async function webhookRoutes(server: FastifyInstance) {
-  // Обработка статуса события
   server.post('/webhook/event-status', async (request, reply) => {
     const { eventId, status } = request.body as {
       eventId: string;
       status: string;
     };
 
+    const validStatuses = ['won', 'lost', 'pending'];
+    if (!validStatuses.includes(status)) {
+      return reply.code(400).send({ error: 'Недопустимый статус.' });
+    }
+
     try {
       const numericEventId = validateNumberId(eventId);
+      const event = await prisma.event.findUnique({
+        where: { id: numericEventId },
+      });
 
-      // Использование транзакции для обновления статусов
+      if (!event) {
+        return reply.code(404).send({ error: 'Событие не найдено' });
+      }
+
       await prisma.$transaction(async (prisma) => {
-        // Обновляем статус события
         await prisma.event.update({
           where: { id: numericEventId },
           data: { status },
         });
 
-        // Обновляем статусы связанных ставок
         await prisma.bet.updateMany({
           where: { eventId: numericEventId },
           data: { status },

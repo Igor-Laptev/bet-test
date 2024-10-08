@@ -6,7 +6,11 @@
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "@mocks/*": ["src/__mocks__/*"]
+    }
   },
 
   "include": ["src/**/*"],

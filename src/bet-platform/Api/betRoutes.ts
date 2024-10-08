@@ -2,9 +2,8 @@ import { FastifyInstance } from 'fastify';
 import { prisma } from '../../prismaClient.js';
 import { betCreationSchema } from '../../Util/validationSchemas.js';
 
-// Описание: Маршруты для управления ставками
 export default async function betRoutes(server: FastifyInstance) {
-  // Получение событий для ставок
+  // Существующий код для GET и POST маршрутов
   server.get('/events', async (request, reply) => {
     try {
       const events = await prisma.event.findMany({
@@ -21,14 +20,13 @@ export default async function betRoutes(server: FastifyInstance) {
       });
       return reply.code(200).send(events);
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching events:', error);
       return reply
         .code(500)
         .send({ error: 'Ошибка при получении событий для ставок.' });
     }
   });
 
-  // Создание новой ставки с валидацией
   server.post(
     '/bets',
     { schema: betCreationSchema },
@@ -38,15 +36,29 @@ export default async function betRoutes(server: FastifyInstance) {
         amount: number;
       };
 
-      try {
-        const event = await prisma.event.findUnique({
-          where: { id: eventId },
-        });
+      if (amount <= 0) {
+        return reply
+          .code(400)
+          .send({ error: 'Сумма ставки должна быть положительной.' });
+      }
 
-        if (!event || event.deadline < Math.floor(Date.now() / 1000)) {
-          return reply.code(400).send({
-            error: 'Событие не найдено или истек дедлайн для ставок.',
-          });
+      try {
+        const event = await prisma.event.findUnique({ where: { id: eventId } });
+
+        const currentTime = Math.floor(Date.now() / 1000);
+        console.log('Event:', event);
+        console.log('Current time:', currentTime);
+
+        if (!event) {
+          console.log(`Event with ID ${eventId} not found`);
+          return reply.code(404).send({ error: 'Событие не найдено.' });
+        }
+
+        if (event.deadline < currentTime) {
+          console.log(`Event with ID ${eventId} is expired`);
+          return reply
+            .code(400)
+            .send({ error: 'Срок действия события истек.' });
         }
 
         const newBet = await prisma.bet.create({
@@ -60,20 +72,77 @@ export default async function betRoutes(server: FastifyInstance) {
 
         return reply.code(201).send(newBet);
       } catch (error) {
-        console.error(error);
+        console.error('Error creating bet:', error);
         return reply.code(500).send({ error: 'Ошибка при создании ставки.' });
       }
     }
   );
 
-  // Получение всех ставок
-  server.get('/bets', async (request, reply) => {
+  server.patch('/bets/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const { status } = request.body as { status: string };
+
     try {
-      const allBets = await prisma.bet.findMany();
-      return reply.code(200).send(allBets);
+      const bet = await prisma.bet.findUnique({ where: { id: Number(id) } });
+
+      if (!bet) {
+        return reply.code(404).send({ error: 'Ставка не найдена.' });
+      }
+
+      const updatedBet = await prisma.bet.update({
+        where: { id: Number(id) },
+        data: { status },
+      });
+
+      return reply.code(200).send(updatedBet);
     } catch (error) {
-      console.error(error);
-      return reply.code(500).send({ error: 'Ошибка при получении ставок.' });
+      console.error('Error updating bet:', error);
+      return reply.code(500).send({ error: 'Ошибка при обновлении ставки.' });
+    }
+  });
+
+  // Добавление DELETE маршрута для удаления ставки по ID
+  server.delete('/bets/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+
+    try {
+      const bet = await prisma.bet.findUnique({ where: { id: Number(id) } });
+
+      if (!bet) {
+        return reply.code(404).send({ error: 'Ставка не найдена.' });
+      }
+
+      await prisma.bet.delete({ where: { id: Number(id) } });
+      return reply.code(204).send();
+    } catch (error) {
+      console.error('Error deleting bet:', error);
+      return reply.code(500).send({ error: 'Ошибка при удалении ставки.' });
+    }
+  });
+
+  // Добавление PATCH маршрута для обновления коэффициента события
+  server.patch('/events/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const { coefficient } = request.body as { coefficient: number };
+
+    try {
+      const event = await prisma.event.findUnique({
+        where: { id: Number(id) },
+      });
+
+      if (!event) {
+        return reply.code(404).send({ error: 'Событие не найдено.' });
+      }
+
+      const updatedEvent = await prisma.event.update({
+        where: { id: Number(id) },
+        data: { coefficient },
+      });
+
+      return reply.code(200).send(updatedEvent);
+    } catch (error) {
+      console.error('Error updating event:', error);
+      return reply.code(500).send({ error: 'Ошибка при обновлении события.' });
     }
   });
 }
