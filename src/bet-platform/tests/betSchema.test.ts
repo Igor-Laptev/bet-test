@@ -1,7 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import request from 'supertest';
-import betRoutes from './betRoutes';
-import { prisma } from '../../__mocks__/prismaClient';
+import betRoutes from '../routes/betRoutes';
 
 describe('Bet Creation Schema Validation', () => {
   let server: FastifyInstance;

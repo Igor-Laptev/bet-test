@@ -44,18 +44,8 @@ export default async function betRoutes(server: FastifyInstance) {
               status: { type: 'string' },
             },
           },
-          400: {
-            type: 'object',
-            properties: {
-              error: { type: 'string' },
-            },
-          },
-          404: {
-            type: 'object',
-            properties: {
-              error: { type: 'string' },
-            },
-          },
+          400: { type: 'object', properties: { error: { type: 'string' } } },
+          404: { type: 'object', properties: { error: { type: 'string' } } },
         },
       },
     },
@@ -64,34 +54,19 @@ export default async function betRoutes(server: FastifyInstance) {
         eventId: number;
         amount: number;
       };
-
-      if (amount <= 0) {
+      if (amount <= 0)
         return reply
           .code(400)
           .send({ error: 'Сумма ставки должна быть положительной.' });
-      }
-
       try {
-        const event = await prisma.event.findUnique({
-          where: { id: eventId },
-        });
-
+        const event = await prisma.event.findUnique({ where: { id: eventId } });
         const currentTime = Math.floor(Date.now() / 1000);
-        console.log('Event:', event);
-        console.log('Current time:', currentTime);
-
-        if (!event) {
-          console.log(`Event with ID ${eventId} not found`);
+        if (!event)
           return reply.code(404).send({ error: 'Событие не найдено.' });
-        }
-
-        if (event.deadline < currentTime) {
-          console.log(`Event with ID ${eventId} is expired`);
+        if (event.deadline < currentTime)
           return reply
             .code(400)
             .send({ error: 'Срок действия события истек.' });
-        }
-
         const newBet = await prisma.bet.create({
           data: {
             eventId,
@@ -100,7 +75,6 @@ export default async function betRoutes(server: FastifyInstance) {
             status: 'pending',
           },
         });
-
         return reply.code(201).send(newBet);
       } catch (error) {
         console.error('Error creating bet:', error);

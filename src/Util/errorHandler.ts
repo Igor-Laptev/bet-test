@@ -1,6 +1,6 @@
 import { FastifyError, FastifyRequest, FastifyReply } from 'fastify';
 
-// Описание: Глобальный обработчик ошибок для сервера Fastify
+// Глобальный обработчик ошибок для сервера Fastify
 export default function errorHandler(
   error: FastifyError,
   request: FastifyRequest,
@@ -12,6 +12,13 @@ export default function errorHandler(
     return reply.status(400).send({
       message: 'Ошибка валидации',
       details: error.validation,
+    });
+  }
+
+  if ((error as any).statusCode) {
+    return reply.status((error as any).statusCode).send({
+      message: error.message,
+      details: (error as any).details,
     });
   }
 

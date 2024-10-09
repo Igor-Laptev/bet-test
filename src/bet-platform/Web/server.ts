@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
-import betRoutes from '../Api/betRoutes.js';
-import webhookRoutes from '../Api/webhook.js';
+import betRoutes from '../routes/betRoutes.js';
+import webhookRoutes from '../routes/webhook.js';
 import errorHandler from '../../Util/errorHandler.js';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
@@ -26,13 +26,20 @@ server.register(swagger, {
 // Swagger UI
 server.register(swaggerUi, {
   routePrefix: '/documentation',
-  swagger: {
-    info: {
-      title: 'Bet Platform API Documentation',
-      description: 'API documentation',
-      version: '1.0.0',
+  uiConfig: {
+    docExpansion: 'none',
+    deepLinking: false,
+  },
+  uiHooks: {
+    onRequest: function (request, reply, next) {
+      next();
+    },
+    preHandler: function (request, reply, next) {
+      next();
     },
   },
+  staticCSP: true,
+  transformStaticCSP: (header) => header,
 });
 
 // Добавляем маршрут для корневого URL

@@ -1,7 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import request from 'supertest';
-import eventRoutes from './eventRoutes';
-import { prisma } from '../../__mocks__/prismaClient';
+import eventRoutes from '../routes/eventRoutes';
 
 describe('Event Creation Schema Validation', () => {
   let server: FastifyInstance;

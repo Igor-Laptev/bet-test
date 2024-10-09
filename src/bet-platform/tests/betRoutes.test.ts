@@ -1,6 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import request from 'supertest';
-import betRoutes from './betRoutes';
+import betRoutes from '../routes/betRoutes';
 import { prisma } from '../../__mocks__/prismaClient';
 
 jest.setTimeout(30000);

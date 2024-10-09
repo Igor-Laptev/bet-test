@@ -1,6 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import request from 'supertest';
-import eventRoutes from './eventRoutes';
+import eventRoutes from '../routes/eventRoutes';
 import { prisma } from '../../__mocks__/prismaClient';
 
 describe('Provider Event API', () => {

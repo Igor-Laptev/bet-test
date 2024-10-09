@@ -1,8 +1,6 @@
 import Fastify from 'fastify';
-import eventRoutes from '../Api/eventRoutes.js';
+import eventRoutes from '../routes/eventRoutes.js';
 import cors from '@fastify/cors';
-import { prisma } from '../../prismaClient.js';
-import axios from 'axios';
 import errorHandler from '../../Util/errorHandler.js';
 
 // Инициализация Fastify сервера

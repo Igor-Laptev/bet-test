@@ -29,12 +29,7 @@ export default async function eventRoutes(server: FastifyInstance) {
               status: { type: 'string' },
             },
           },
-          400: {
-            type: 'object',
-            properties: {
-              error: { type: 'string' },
-            },
-          },
+          400: { type: 'object', properties: { error: { type: 'string' } } },
         },
       },
     },
@@ -43,11 +38,8 @@ export default async function eventRoutes(server: FastifyInstance) {
         coefficient: number;
         deadline: number;
       };
-
-      if (deadline < Math.floor(Date.now() / 1000)) {
+      if (deadline < Math.floor(Date.now() / 1000))
         return reply.code(400).send({ error: 'Срок действия события истек.' });
-      }
-
       try {
         const newEvent = await prisma.event.create({
           data: { coefficient, deadline, status: 'pending' },

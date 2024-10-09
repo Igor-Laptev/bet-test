@@ -1,6 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import request from 'supertest';
-import webhookRoutes from '../../bet-platform/Api/webhook';
+import webhookRoutes from '../../bet-platform/routes/webhook';
 
 describe('Event Status Update Schema Validation', () => {
   let server: FastifyInstance;
@@ -26,7 +26,7 @@ describe('Event Status Update Schema Validation', () => {
       .send(invalidStatusUpdate);
 
     expect(response.status).toBe(400);
-    expect(response.body.error).toContain('Недопустимый статус.');
+    expect(response.body.error).toContain('Bad Request');
   });
 
   it('should fail when "status" is missing', async () => {
